@@ -53,5 +53,34 @@ app.get("/", (req, res) => {
   res.send("Hello from home!");
 });
 
+app.use((req, res, next) => {
+  console.log(`Request received: ${req.method} ${req.url}`);
+  next();
+});
+
+app.get("/", (req, res) => {
+  res.send("Home Page");
+});
+
+app.get("/about", (req, res) => {
+  res.send("About Page");
+});
+
 app.listen(3000);
 console.log("Server running on http://localhost:3000");
+
+
+//middleware examples using logging time 
+function logTime(req, res, next) {
+  console.log("Time:", new Date().toISOString());
+  next();
+}
+
+function verifyUser(req, res, next) {
+  console.log(" User verified!");
+  next();
+}
+
+app.get("/profile", logTime, verifyUser, (req, res) => {
+  res.send(" User Profile Page");
+});
