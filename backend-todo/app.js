@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const taskRoutes = require("./routes/tasks");
@@ -14,4 +15,5 @@ app.use((req, res, next) => {
 // Use the tasks route
 app.use("/api/tasks", taskRoutes);
 
-app.listen(3000, () => console.log("🚀 Server running on http://localhost:3000"));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(` Server running on http://localhost:${PORT}`));
