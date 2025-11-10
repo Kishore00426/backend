@@ -1,47 +1,20 @@
 const express = require("express");
-const router = express.Router(); //router for 
-
-let tasks = []; // temporary in-memory storage
+const router = express.Router(); //router for
+const { createTask, getTasks, getTaskById, updateTask, deleteTask } = require("../controllers/tasks");
 
 // CREATE (POST)
-router.post("/", (req, res) => {
-  const newTask = {
-    id: tasks.length + 1,
-    title: req.body.title,
-    completed: true
-  };
-  tasks.push(newTask);
-  res.status(201).json(newTask);
-});
+router.post("/", createTask);
 
 // READ (GET all tasks)
-router.get("/", (req, res) => {
-  res.json(tasks);
-});
+router.get("/", getTasks);
 
 // READ (GET by ID)
-router.get("/:id", (req, res) => {
-  const task = tasks.find(t => t.id === parseInt(req.params.id));
-  if (!task) return res.status(404).send("Task not found");
-  res.json(task);
-});
+router.get("/:id", getTaskById);
 
 // UPDATE (PUT)
-router.put("/:id", (req, res) => {
-  const task = tasks.find(t => t.id === parseInt(req.params.id));
-  if (!task) return res.status(404).send("Task not found");
+router.put("/:id", updateTask);
 
-  task.title = req.body.title || task.title;
-  task.completed = req.body.completed ?? task.completed;
-
-  res.json(task);
-});
-
-//  DELETE
-router.delete("/:id", (req, res) => {
-  const id = parseInt(req.params.id);
-  tasks = tasks.filter(t => t.id !== id);
-  res.send("Task deleted");
-});
+// DELETE
+router.delete("/:id", deleteTask);
 
 module.exports = router;
