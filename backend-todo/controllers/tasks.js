@@ -5,7 +5,7 @@ function createTask(req, res) {
   const newTask = {
     id: tasks.length + 1,
     title: req.body.title,
-    completed: true
+    completed: false
   };
   tasks.push(newTask);
   res.status(201).json(newTask);
