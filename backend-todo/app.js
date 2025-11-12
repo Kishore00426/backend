@@ -1,19 +1,24 @@
-require("dotenv").config();
-const express = require("express");
-const app = express();
-const taskRoutes = require("./routes/tasks");
+import express from "express";
+import "dotenv/config";
+import taskRoutes from "./routes/tasks.js";
 
-// Middleware to parse JSON
+const app = express();
+
 app.use(express.json());
 
-// Global middleware 
+// Middleware for logs
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
   next();
 });
 
-// Use the tasks route
 app.use("/api/tasks", taskRoutes);
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(` Server running on http://localhost:${PORT}`));
+app.get("/", (req, res) => {
+  res.send(" Welcome to the To-Do API! Use /api/tasks");
+});
+
+app.listen(PORT, () =>
+  console.log(`✅ Server running on http://localhost:${PORT}`)
+);
