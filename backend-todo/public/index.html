@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>To-Do App (Drizzle + Supabase)</title>
+    <style>
+      body {
+        font-family: "Segoe UI", sans-serif;
+        margin: 2rem;
+        background: #f7f9fc;
+      }
+      h1 {
+        text-align: center;
+        color: #2c3e50;
+      }
+      form {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+      }
+      input {
+        padding: 0.5rem;
+        width: 250px;
+        margin-right: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+      }
+      button {
+        padding: 0.5rem 1rem;
+        border: none;
+        background: #007bff;
+        color: white;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+        max-width: 400px;
+        margin: auto;
+      }
+      li {
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 0.5rem 0;
+        padding: 0.7rem 1rem;
+        border-radius: 8px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+      }
+      .completed {
+        text-decoration: line-through;
+        color: gray;
+      }
+      .actions button {
+        margin-left: 5px;
+        background: #e0e0e0;
+        color: black;
+      }
+      .actions button:hover {
+        background: #ccc;
+      }
+      .delete {
+        background: #dc3545;
+        color: white;
+      }
+      .delete:hover {
+        background: #b52b38;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>📝 My To-Do List</h1>
+
+    <form id="taskForm">
+      <input id="title" type="text" placeholder="Enter task..." required />
+      <button>Add</button>
+    </form>
+
+    <ul id="taskList"></ul>
+
+    <script>
+      const API_URL = "/api/tasks";
+      const taskList = document.getElementById("taskList");
+      const form = document.getElementById("taskForm");
+      const titleInput = document.getElementById("title");
+
+      // Load all tasks
+      async function loadTasks() {
+        const res = await fetch(API_URL);
+        const tasks = await res.json();
+        taskList.innerHTML = "";
+        tasks.forEach((task) => renderTask(task));
+      }
+
+      // Render one task
+      function renderTask(task) {
+        const li = document.createElement("li");
+        const title = document.createElement("span");
+        title.textContent = task.title;
+        if (task.completed) title.classList.add("completed");
+        li.appendChild(title);
+
+        // Actions
+        const actions = document.createElement("div");
+        actions.classList.add("actions");
+
+        const toggleBtn = document.createElement("button");
+        toggleBtn.textContent = task.completed ? "Undo" : "Done";
+        toggleBtn.onclick = () => toggleTask(task.id, !task.completed);
+        actions.appendChild(toggleBtn);
+
+        const editBtn = document.createElement("button");
+        editBtn.textContent = "Edit";
+        editBtn.onclick = () => editTask(task);
+        actions.appendChild(editBtn);
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Delete";
+        deleteBtn.classList.add("delete");
+        deleteBtn.onclick = () => deleteTask(task.id);
+        actions.appendChild(deleteBtn);
+
+        li.appendChild(actions);
+        taskList.appendChild(li);
+      }
+
+      // Add task
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const title = titleInput.value.trim();
+        if (!title) return;
+        await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title }),
+        });
+        titleInput.value = "";
+        loadTasks();
+      });
+
+      // Edit task
+      async function editTask(task) {
+        const newTitle = prompt("Edit task:", task.title);
+        if (newTitle && newTitle.trim() !== task.title) {
+          await fetch(`${API_URL}/${task.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title: newTitle }),
+          });
+          loadTasks();
+        }
+      }
+
+      // Delete task
+      async function deleteTask(id) {
+        if (confirm("Are you sure?")) {
+          await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+          loadTasks();
+        }
+      }
+
+      // Toggle completion
+      async function toggleTask(id, completed) {
+        await fetch(`${API_URL}/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ completed }),
+        });
+        loadTasks();
+      }
+
+      loadTasks();
+    </script>
+  </body>
+</html>
